@@ -21,10 +21,12 @@ class ViewerViewModel @JvmOverloads constructor(
 
     private val filesData = MutableStateFlow(listOf<FileData>())
     private val errorMessage = MutableStateFlow<String?>(null)
+    private val isLoading = MutableStateFlow(true)
 
     val state: StateFlow<ViewerViewState> = combine(
         filesData,
         errorMessage,
+        isLoading,
         ::ViewerViewState
     ).stateIn(
         scope = viewModelScope,
@@ -35,12 +37,15 @@ class ViewerViewModel @JvmOverloads constructor(
     fun handleDirectorySelection(context: Context, treeUri: Uri) {
         val pickedDirectory = DocumentFile.fromTreeUri(context, treeUri) ?: return
         viewModelScope.launch(Dispatchers.IO) {
+            isLoading.value = true
             val files = filesFromPathUseCase.trySync(
                 FilesFromPathUseCase.Params(pickedDirectory)
             ) ?: run {
+                isLoading.value = false
                 errorMessage.value = "Something went wrong, try selecting the directory again!"
                 return@launch
             }
+            isLoading.value = false
 
             if (files.isEmpty()) {
                 errorMessage.value =

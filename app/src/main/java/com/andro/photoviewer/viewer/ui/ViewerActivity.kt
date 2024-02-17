@@ -8,6 +8,7 @@ import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearSnapHelper
 import androidx.recyclerview.widget.RecyclerView
@@ -107,6 +108,8 @@ class ViewerActivity : AppCompatActivity() {
     }
 
     private fun updateUi(state: ViewerViewState) {
+        binding.viewerProgressBar.isVisible = state.isLoading
+
         if (state.errorMessage != null) {
             showToast(state.errorMessage)
             showDialogToAskDirectory()
